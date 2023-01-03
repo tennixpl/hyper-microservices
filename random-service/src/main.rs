@@ -1,14 +1,15 @@
-use dotenv::dotenv;
-use hyper::rt::Future;
-use hyper::server::Server;
-use hyper::service::service_fn;
-use hyper::{Body, Request, Response};
-use std::future::Future;
 
+use dotenv::dotenv;
+use hyper::{Body, Response, Server};
+use hyper::rt::Future;
+use hyper::service::service_fn_ok;
 use log::{debug, info, trace};
 use std::env;
 
+
+
 fn main() {
+
     pretty_env_logger::init();
     info!("Rand Microservice - v0.1.0");
     trace!("Starting...");
@@ -20,11 +21,13 @@ fn main() {
 
     debug!("Trying to bind server to address: {}", addr);
 
-    let builder = hyper::Server::bind(&addr);
+
+    let builder = Server::bind(&addr);
     trace!("Creating service handler...");
 
-    let server = builder.serve(|| {
-        service_fn(|req| {
+
+    let server = builder.serve( || {
+        service_fn_ok(|req| {
             trace!("Incoming request is: {:?}", req);
             let random_byte = rand::random::<u8>();
             debug!("Generated value is: {}", random_byte);
@@ -36,4 +39,5 @@ fn main() {
     let server = server.map_err(drop);
     debug!("Run!");
     hyper::rt::run(server);
+
 }
